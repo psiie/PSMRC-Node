@@ -1,5 +1,4 @@
 var fs = require('fs');
-var unzip = require('unzip');
 var gm = require('gm').subClass({imageMagick: true});
 var blockSprites = require('./sprites-block');
 var itemSprites = require('./sprites-item');
@@ -61,6 +60,7 @@ function findPNG(shortDirectory) {
     }
   })
 }
+
 
 // ----------------- Imagemagick Functions ----------------- //
 
@@ -138,13 +138,6 @@ function saveSheet(spritesheet, filename, size) {
 }
 
 // ----------------- MAIN ----------------- //
-
-fs.createReadStream('uploads/9828634998546759')
-  .pipe( unzip.Extract({ path: 'uploads/9828634998546759-unzip' }) )
-  .on('finish', () => {
-    console.log('finished unzip');
-  }
-)
 
 // Organize an output folder
 layout.forEach((i)=>{

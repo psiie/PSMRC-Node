@@ -1,9 +1,11 @@
 var fs = require('fs');
+var unzip = require('unzip');
 var gm = require('gm').subClass({imageMagick: true});
 var blockSprites = require('./sprites-block');
 var itemSprites = require('./sprites-item');
 var singleSprites = require('./sprites-single');
-var importDirectory = findImportDirectory(); // Declare so find only runs once
+// var importDirectory = findImportDirectory(); // Declare so find only runs once
+var importDirectory;
 var layout = [
   // '/export/armor',
   // '/export/font',
@@ -17,12 +19,13 @@ var layout = [
 
 // ----------------- Directory Functions ----------------- //
 
-function makeLayout(folder) {
+function makeLayout(folder, cookie) {
   if (!fs.existsSync(folder)) {
-    fs.mkdir(folder, ()=>console.log('created dir'));
+    fs.mkdir('uploads/' + cookie + '-create' + folder, ()=>console.log('created dir'));
   }
 }
 
+// depricated now that dir is automatically renamed to cookie
 function findImportDirectory() {
   console.log('running findImportDirectory :\\');
   // Returns a promise with the most likely folder to be importing
@@ -60,7 +63,6 @@ function findPNG(shortDirectory) {
     }
   })
 }
-
 
 // ----------------- Imagemagick Functions ----------------- //
 
@@ -139,17 +141,43 @@ function saveSheet(spritesheet, filename, size) {
 
 // ----------------- MAIN ----------------- //
 
-// Organize an output folder
-layout.forEach((i)=>{
-  makeLayout(i);
-})
+module.exports = function(cookie) {
+  if (!cookie) {return -1}
+  cookie = 'override';
 
-// Create item & terrain spritesheet
-var blockSpritesheet = gm(256,512).bitdepth(8).background('transparent');
-var itemSpritesheet = gm(256,256).bitdepth(8).background('transparent');
-montageEach(blockSpritesheet, blockSprites, '16x32', 'blocks/', 'terrain.png');
-montageEach(itemSpritesheet, itemSprites, '16x16', 'items/', 'items.png');
+  fs.createReadStream('uploads/' + cookie)
+  .pipe( unzip.Extract({ path: 'uploads/' + cookie + '-unzip' }) )
+  .on('finish', () => {
+    console.log('finished unzip');
+    
+    // Organize an output folder
+    // Create specific user's cookie folder first
+    importDirectory = 'uploads/' + cookie + '-create';
+    fs.mkdir(importDirectory, (err) => {
+      if (err) {console.log('err', err);}
 
-// Copy Destroy Stages 0-9
-moveAndConvert();
+      // Create layout inside user's cookie folder
+      layout.forEach((i)=>{
+        makeLayout(i, cookie);
+      });
 
+      // I'm banking on the fact that directory creation is o1 time. montage 
+      // creation should always take longer. It's not waiting for completion
+      // Create item & terrain spritesheet
+
+      var blockSpritesheet = gm(256,512).bitdepth(8).background('transparent');
+      var itemSpritesheet = gm(256,256).bitdepth(8).background('transparent');
+      // montageEach(blockSpritesheet, blockSprites, '16x32', 'blocks/', 'terrain.png');
+      // montageEach(itemSpritesheet, itemSprites, '16x16', 'items/', 'items.png');
+
+      // Copy Destroy Stages 0-9
+      // moveAndConvert();
+
+
+
+
+
+    });
+
+  });
+}

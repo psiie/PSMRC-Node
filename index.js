@@ -3,6 +3,7 @@ var app = express();
 var path = require('path');
 var formidable = require('formidable');
 var cookieParser = require('cookie-parser');
+var psmrc = require('./psmrc');
 var fs = require('fs');
 
 
@@ -14,6 +15,7 @@ app.use(function(req, res, next) {
     var randomNumber=Math.random().toString();
     randomNumber=randomNumber.substring(2,randomNumber.length);
     res.cookie('cookieName',randomNumber, { maxAge: 900000, httpOnly: true });
+    req.cookies.cookieName = randomNumber;
     console.log('cookie created successfully', randomNumber);
   } else {
     console.log('cookie exists', cookie);
@@ -25,6 +27,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 // ––––––––––– Paths ––––––––––– //
 
 app.get('/', function(req, res){
+  console.log('app get / cookie', req.cookies.cookieName);
+  // console.log(unzip);
+  psmrc(req.cookies.cookieName);
   res.sendFile(path.join(__dirname, 'views/index.html'));
 });
 
