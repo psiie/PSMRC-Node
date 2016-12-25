@@ -1,5 +1,7 @@
 var fs = require('fs');
 var unzip = require('unzip');
+var archiver = require('archiver');
+var archive = archiver('zip');
 var gm = require('gm').subClass({imageMagick: true});
 var blockSprites = require('./sprites-block');
 var itemSprites = require('./sprites-item');
@@ -176,7 +178,7 @@ function saveSheet(spritesheet, filename, size) {
 
 // ----------------- MAIN ----------------- //
 
-module.exports = function(cookie) {
+module.exports = function(res, cookie) {
   if (!cookie) {return -1}
   cookie = 'override';
 
@@ -213,6 +215,21 @@ module.exports = function(cookie) {
           moveAndConvert()
           .then( ()=> {
             console.log('Done Step 3');
+
+            // Create a zip archive
+            var fileName =   'public/pack/' + cookie + '.zip'
+            var fileOutput = fs.createWriteStream(fileName);
+
+            archive.pipe(fileOutput);
+            archive.glob("**/*", {cwd: 'uploads/' + cookie + '-create/'});
+            archive.on('error', function(err){throw err;});
+            archive.finalize();
+            
+            fileOutput.on('close', function () {
+                console.log(archive.pointer() + ' total bytes');
+                console.log('Done Step 4');
+                res.send('/pack/' + cookie + '.zip')
+            });
 
           });
         });

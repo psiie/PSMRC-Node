@@ -28,9 +28,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', function(req, res){
   console.log('app get / cookie', req.cookies.cookieName);
-  // console.log(unzip);
-  psmrc(req.cookies.cookieName);
+  // psmrc(res, req.cookies.cookieName);
   res.sendFile(path.join(__dirname, 'views/index.html'));
+});
+
+app.get('/download', function(req, res) {
+  psmrc(res, req.cookies.cookieName);
+  console.log('initiating PSMRC. Will reply with download link');
 });
 
 app.post('/upload', function(req, res){
