@@ -83,76 +83,95 @@ function findPNG(shortDirectory) {
 // ----------------- Imagemagick Functions ----------------- //
 
 function montageEach(spritesheet, sprites, sheetSize, folder, savename) {
-  // Recursive function to allow successive Promises to resolve in sequence
-  let counter = 0;
-  let apply = function(spritesheet, sprites) {
-    findPNG(folder + sprites[counter]).then(dir => {
-      spritesheet.montage(dir);
-      if (counter < sprites.length-1) {
-        counter += 1;
-        apply(spritesheet, sprites);
-      } else {
-        saveSheet(spritesheet, savename, sheetSize);
-      }
-    });
-  }
-  apply(spritesheet, sprites);
-}
-
-function moveAndConvert() {
-  // This function loads each element of singleSprites and converts/moves the file.
-  let counter = 0;
-  let apply = function() {
-    if (counter < singleSprites.length) {
-      findPNG(singleSprites[counter][2]).then(dir => {
-        if (dir == './uploads/default/404.png') {
-          console.log('missing ', singleSprites[counter[2]], 'skipping...');
+  return new Promise( (resolve, reject) => {
+    // Recursive function to allow successive Promises to resolve in sequence
+    let counter = 0;
+    let apply = function(spritesheet, sprites) {
+      findPNG(folder + sprites[counter]).then(dir => {
+        spritesheet.montage(dir);
+        if (counter < sprites.length-1) {
           counter += 1;
-          apply();
+          apply(spritesheet, sprites);
         } else {
-          console.log(dir);
-          gm(dir)
-            .resize(singleSprites[counter][0],singleSprites[counter][1])
-            .bitdepth(8)
-            .background('transparent')
-            .write(importDirectory + '-create/' + singleSprites[counter][3], err => {
-              if (err) {console.log('error writing on ' + counter + '[3]:', err)
-              } else {
-                console.log('written ' + singleSprites[counter][3]);
-                counter += 1;
-                apply();
-              }
-            })
+          saveSheet(spritesheet, savename, sheetSize)
+            .then(()=>{ resolve() })
         }
       });
     }
-  }
-  apply();
+    apply(spritesheet, sprites);
+  })
+
+}
+
+function moveAndConvert() {
+  return new Promise( (resolve, reject) => {
+    // This function loads each element of singleSprites and converts/moves the file.
+    let counter = 0;
+    let apply = function() {
+      if (counter < singleSprites.length) {
+        findPNG(singleSprites[counter][2]).then(dir => {
+          if (dir == './uploads/default/404.png') {
+            console.log('missing ', singleSprites[counter[2]], 'skipping...');
+            counter += 1;
+            apply();
+          } else {
+            gm(dir)
+              .resize(singleSprites[counter][0],singleSprites[counter][1])
+              .bitdepth(8)
+              .background('transparent')
+              .write(importDirectory + '-create/' + singleSprites[counter][3], err => {
+                if (err) {console.log('error writing on ' + counter + '[3]:', err)
+                } else {
+                  console.log('written ' + singleSprites[counter][3]);
+                  counter += 1;
+                  apply();
+                }
+              })
+          }
+        });
+      } else { 
+        resolve();
+      }
+    }
+    apply();
+  })
 }
 
 function saveSheet(spritesheet, filename, size) {
-  console.log('ran saver function');
-  spritesheet
-    .geometry('16x16+0+0').tile(size)
-    .write(importDirectory + '-create/' + filename, (err) => {
-      if (!err) {console.log('written', filename)} 
-      else {console.log(err);}
-    })
+  return new Promise( (resolve, reject) => {
+    console.log('ran saver function');
+    
+    if (filename == 'terrain.png') {
+      // Only terrain.png has MipMapLevels
+      spritesheet
+        .geometry('8x8+0+0').tile(size)
+        .write(importDirectory + '-create/terrainMipMapLevel2.png', (err) => {
+          if (err) {console.log(err);}
+          else {console.log('written terrainMipMapLevel2')} 
+        })
 
-  if (filename == 'terrain.png') {
-    // Only terrain.png has MipMapLevels
+      spritesheet
+        .geometry('4x4+0+0').tile(size)
+        .write(importDirectory + '-create/terrainMipMapLevel3.png', (err) => {
+          if (err) {console.log(err);}
+          else {console.log('written terrainMipMapLevel3')} 
+        })  
+    }
+
     spritesheet
-      .geometry('8x8+0+0').tile(size)
-      .write(importDirectory + '-create/terrainMipMapLevel2.png', (err) => {
-        if (!err) {console.log('written terrainMipMapLevel2')} 
+      .geometry('16x16+0+0').tile(size)
+      .write(importDirectory + '-create/' + filename, (err) => {
+        if (err) {console.log(err);}
+        else {
+          console.log('written', filename);
+          resolve();
+          // setTimeout(()=>{console.log('resolving');resolve()},1000)
+        } 
       })
 
-    spritesheet
-      .geometry('4x4+0+0').tile(size)
-      .write(importDirectory + '-create/terrainMipMapLevel3.png', (err) => {
-        if (!err) {console.log('written terrainMipMapLevel3')} 
-      })  
-  }
+
+  })
+
 }
 
 // ----------------- MAIN ----------------- //
@@ -183,11 +202,22 @@ module.exports = function(cookie) {
 
       var blockSpritesheet = gm(256,512).bitdepth(8).background('transparent');
       var itemSpritesheet = gm(256,256).bitdepth(8).background('transparent');
-      montageEach(blockSpritesheet, blockSprites, '16x32', 'blocks/', 'terrain.png');
-      montageEach(itemSpritesheet, itemSprites, '16x16', 'items/', 'items.png');
+      montageEach(blockSpritesheet, blockSprites, '16x32', 'blocks/', 'terrain.png')
+      .then( () => { 
+        console.log('Done Step 1');
+        
+        montageEach(itemSpritesheet, itemSprites, '16x16', 'items/', 'items.png')
+        .then( () => { 
+          console.log('Done Step 2'); 
+          // Copy Destroy Stages 0-9
+          moveAndConvert()
+          .then( ()=> {
+            console.log('Done Step 3');
 
-      // Copy Destroy Stages 0-9
-      moveAndConvert();
+          });
+        });
+      });
+
 
 
 
