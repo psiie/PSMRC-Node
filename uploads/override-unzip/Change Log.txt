@@ -1,0 +1,89 @@
+06/23/2014 ----------------
+
++ Brand new smoke particles!
++ Brand new lava animation!!
++ Brand new water animation!!!
+
+06/17/2014 ----------------
+
++ New Lapis Lazuli Ore block
+
+* Modified all other ore blocks to match new stone texture
+* Modified Coal block to be a bit brighter
+
+06/11/2014 ----------------
+
++ New "Apple Sprout" texture to make those
+  budding apple trees look more like... well, apple trees.
++ New Bowl & Mushroom Stew icons
++ New Cauldron icon
++ New Hopper icon
++ New Coal and Charcoal icons
++ New Ender Pearl texture and name "Warp Stone"
++ New Eye of Ender texture and name "Void Stone"
++ New Magma Cream icon
++ New Cake and Cake icons - now actually look tasty!
+
+* Modified Stone texture to make those natural rocks look a bit more rocky
+* Modified Ender Dragon graphics to match other new ender-related items
+  and updated name to "Void Drake"
+* Modified Enderman textures to match new Warp Stone icon
+* Modified End Stone colours
+* Modified Bottles & Experience Bottle icons
+
+22/05/2014 ----------------
+
+* Modified Redstone Block texture to appear as solid redstone
+  (the border just wasn't doing it or me.)
+
+18/05/2014 ----------------
+
++ New Tall Fern and Syringa textures (finally!)
+
+* Modified Diamond, Emerald, Redstone and Lapis blocks;
+  Each now has an individual stone texture (not all spirals)
+
+17/05/2014 ----------------
+
++ New Gold Nugget texture and language = "Gold Coins"!!!
+  Now you can trade in legitimate currency with your friends!
+
+* Modified redstone block to have a gold border instead of iron
+* Modified stone bricks textures - back to large brick slabs
+
+21/04/2014 ----------------
+
++ New Plank textures
++ New Iron/Gold Block textures
++ New Ladder texture
+
+* Modified Wood Door texture
+* Modified Bookshelf texture
+* Modified Rail textures
+* Modified Carved Stone texture
+
+06/04/2014 ----------------
+
+* Modified Netherrack, Quartz Ore and Soul Sand textures
+* Modified Stone, Stone_Slab_Side, Stone_Slab_Top textures
+* Modified Grass_Top and Grass_Side_Overlay textures
+
+17/11/2013 ----------------
+
++ New 1.7 one-block flower textures
++ New Glass, Stained Glass and Glass Top textures - Vibrant stained glass, thinner frames
++ New Clay - looks less like sand now
++ New Crafting Bench - Rotate 3x3d grid 45 degrees, revamped block texture
++ New Book Shelves - books same colour as items
++ New Torches & Redstone Torches - more streamlined, less obtrusive
++ New Cobweb texture (finally)
+
+* Modified Acacia Planks - now more closely match Acacia Log interior colour
+* Modified Beds - slight pixel tweaks on all sides
+* Modified Brewing Stand base - Potion slots stand out more
+* Modified Red Sand - looks less like clay now
+* Modified Hay - Slightly brighter
+* Modified Stone Slab & Slab Top - Now flush with natural stone (for half-block steps)
+
+[] All tools now cohesively aligned on the grid
+[] Tweaks and improvements to text, wording and GUI to unify design
