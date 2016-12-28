@@ -5,7 +5,11 @@
 html,
 body {
   height: 100%;
-  background-color: #4791D2;
+  /*background-color: #4791D2;*/
+  background: url('../img/bg.jpg');
+  background-repeat: no-repeat;
+  /*background-size: auto 100%;*/
+  background-size: cover;
 }
 
 body {
@@ -66,4 +70,11 @@ h2 {
   .container {
     width: 450px;
   }
+}
+
+
+/*-----------*/
+
+.logo {
+  width: 50%;
 }

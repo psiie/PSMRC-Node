@@ -25,6 +25,7 @@ $('#upload-input').on('change', function(){
         contentType: false,
         success: function(data){
             console.log('upload successful!');
+            downloadPack();
         },
         xhr: function() {
           // create an XMLHttpRequest
@@ -52,3 +53,17 @@ $('#upload-input').on('change', function(){
       });
     }
 });
+
+function downloadPack() {
+  console.log('waiting for download link');
+  $.ajax({
+    url: '/download',
+    type: 'GET',
+    error: e => {console.log(e)},
+    success: (data)=>{
+      console.log(data);
+      window.location.href = data;
+    }
+
+  })
+}

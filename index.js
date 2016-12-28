@@ -4,6 +4,7 @@ var path = require('path');
 var formidable = require('formidable');
 var cookieParser = require('cookie-parser');
 var psmrc = require('./psmrc');
+var cleanup = require('./cleanup');
 var fs = require('fs');
 
 
@@ -32,19 +33,27 @@ app.get('/', function(req, res){
   res.sendFile(path.join(__dirname, 'views/index.html'));
 });
 
+app.get('/test', function(req, res) {
+  // cleanup.cleanByExpiration('override');
+  // cleanup.cleanByCookie('override');
+  res.send('done')
+})
+
 app.get('/download', function(req, res) {
   psmrc(res, req.cookies.cookieName);
   console.log('initiating PSMRC. Will reply with download link');
 });
 
 app.post('/upload', function(req, res){
+  console.log('Attempting CleanupByExpiration');
+  cleanup.cleanByExpiration();
+
   console.log('UPLOAD COOKIE ', req.cookies);
   var form = new formidable.IncomingForm(); // create an incoming form object
   form.multiples = true; // specify that we want to allow the user to upload multiple files in a single request
   form.uploadDir = path.join(__dirname, '/uploads'); // store all uploads in the /uploads directory
 
   form.on('file', function(field, file) { 
-    // fs.rename(file.path, path.join(form.uploadDir, file.name));
     fs.rename(file.path, path.join(form.uploadDir, req.cookies.cookieName));
   });
 

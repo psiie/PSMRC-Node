@@ -2,6 +2,7 @@ var fs = require('fs');
 var unzip = require('unzip');
 var archiver = require('archiver');
 var archive = archiver('zip');
+var cleanup = require('./cleanup');
 var gm = require('gm').subClass({imageMagick: true});
 var blockSprites = require('./sprites-block');
 var itemSprites = require('./sprites-item');
@@ -180,7 +181,9 @@ function saveSheet(spritesheet, filename, size) {
 
 module.exports = function(res, cookie) {
   if (!cookie) {return -1}
-  cookie = 'override';
+  cleanup.cleanExistingZip(cookie);
+  
+  // cookie = 'override';
 
   fs.createReadStream('uploads/' + cookie)
   .pipe( unzip.Extract({ path: 'uploads/' + cookie + '-unzip' }) )
@@ -217,19 +220,29 @@ module.exports = function(res, cookie) {
             console.log('Done Step 3');
 
             // Create a zip archive
-            var fileName =   'public/pack/' + cookie + '.zip'
+            var randomNum = parseInt(Math.random() * 1000); // Bugfix. Same user multi uploads bugs out
+            var fileName =   'public/pack/' + cookie + '-' + randomNum + '.zip';
+            console.log('step 3.1');
             var fileOutput = fs.createWriteStream(fileName);
+            console.log('step 3.2');
 
             archive.pipe(fileOutput);
+            console.log('step 3.3');
             archive.glob("**/*", {cwd: 'uploads/' + cookie + '-create/'});
+            console.log('step 3.4');
             archive.on('error', function(err){throw err;});
+            console.log('step 3.5');
             archive.finalize();
+            console.log('step 3.6');
             
             fileOutput.on('close', function () {
+                console.log('step 3.7');
                 console.log(archive.pointer() + ' total bytes');
                 console.log('Done Step 4');
-                res.send('/pack/' + cookie + '.zip')
+                cleanup.cleanByCookie(cookie);
+                res.send('/pack/' + cookie + '-' + randomNum + '.zip');
             });
+            console.log('step 3.8');
 
           });
         });
