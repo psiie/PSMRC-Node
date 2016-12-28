@@ -34,14 +34,20 @@ app.get('/', function(req, res){
 });
 
 app.get('/test', function(req, res) {
-  // cleanup.cleanByExpiration('override');
-  // cleanup.cleanByCookie('override');
-  res.send('done')
+  fixNested(req.cookies.cookieName)
+    .then( () => {
+      res.send('done')
+    })
+    .catch( () => 
+      res.send('empty zip file :(') 
+    )
 })
 
 app.get('/download', function(req, res) {
-  psmrc(res, req.cookies.cookieName);
   console.log('initiating PSMRC. Will reply with download link');
+  psmrc(res, req.cookies.cookieName);
+  
+    // .catch( () => res.send('error: empty zip file'))
 });
 
 app.post('/upload', function(req, res){

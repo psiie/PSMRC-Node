@@ -4,6 +4,7 @@ var archiver = require('archiver');
 var archive = archiver('zip');
 var cleanup = require('./cleanup');
 var gm = require('gm').subClass({imageMagick: true});
+var fixNested = require('./fixNested');
 var blockSprites = require('./sprites-block');
 var itemSprites = require('./sprites-item');
 var singleSprites = require('./sprites-single');
@@ -187,71 +188,80 @@ module.exports = function(res, cookie) {
 
   fs.createReadStream('uploads/' + cookie)
   .pipe( unzip.Extract({ path: 'uploads/' + cookie + '-unzip' }) )
+  // .on('finish', () => {fixNested().then( () => {} )}
   .on('finish', () => {
     console.log('finished unzip');
-    
-    // Organize an output folder
-    // Create specific user's cookie folder first
-    importDirectory = 'uploads/' + cookie;
-    fs.mkdir(importDirectory + '-create', (err) => {
-      if (err) {console.log('err', err);}
+    fixNested(cookie).then( () => {
+      console.log('outside fixnested');
+      process(res, cookie)} )
+  });
+}
 
-      // Create layout inside user's cookie folder
-      layout.forEach((i)=>{
-        makeLayout(i, cookie);
-      });
+function process(res, cookie) {
+  console.log('+++ indise process');
+  console.log('1');
+  // Organize an output folder
+  // Create specific user's cookie folder first
+  importDirectory = 'uploads/' + cookie;
+  console.log('2');
+  fs.mkdir(importDirectory + '-create', (err) => {
+    console.log('3');
+    if (err) {console.log('err', err);}
 
-      // I'm banking on the fact that directory creation is o1 time. montage 
-      // creation should always take longer. It's not waiting for completion
-      // Create item & terrain spritesheet
+    // Create layout inside user's cookie folder
+    layout.forEach((i)=>{
+      makeLayout(i, cookie);
+    });
 
-      var blockSpritesheet = gm(256,512).bitdepth(8).background('transparent');
-      var itemSpritesheet = gm(256,256).bitdepth(8).background('transparent');
-      montageEach(blockSpritesheet, blockSprites, '16x32', 'blocks/', 'terrain.png')
+    // I'm banking on the fact that directory creation is o1 time. montage 
+    // creation should always take longer. It's not waiting for completion
+    // Create item & terrain spritesheet
+
+    var blockSpritesheet = gm(256,512).bitdepth(8).background('transparent');
+    var itemSpritesheet = gm(256,256).bitdepth(8).background('transparent');
+    montageEach(blockSpritesheet, blockSprites, '16x32', 'blocks/', 'terrain.png')
+    .then( () => { 
+      console.log('Done Step 1');
+      
+      montageEach(itemSpritesheet, itemSprites, '16x16', 'items/', 'items.png')
       .then( () => { 
-        console.log('Done Step 1');
-        
-        montageEach(itemSpritesheet, itemSprites, '16x16', 'items/', 'items.png')
-        .then( () => { 
-          console.log('Done Step 2'); 
-          // Copy Destroy Stages 0-9
-          moveAndConvert()
-          .then( ()=> {
-            console.log('Done Step 3');
+        console.log('Done Step 2'); 
+        // Copy Destroy Stages 0-9
+        moveAndConvert()
+        .then( ()=> {
+          console.log('Done Step 3');
 
-            // Create a zip archive
-            var fileName =   'public/pack/' + cookie + '.zip';
-            var fileOutput = fs.createWriteStream(fileName);
-            var cleanFileWriting = function() {
-              // This function performs cleanup which would otherwise cause bugs
-              archive = archiver('zip');
-              fileOutput = undefined;
-            }
+          // Create a zip archive
+          var fileName =   'public/pack/' + cookie + '.zip';
+          var fileOutput = fs.createWriteStream(fileName);
+          var cleanFileWriting = function() {
+            // This function performs cleanup which would otherwise cause bugs
+            archive = archiver('zip');
+            fileOutput = undefined;
+          }
 
-            archive.pipe(fileOutput);
-            archive.glob("**/*", {cwd: 'uploads/' + cookie + '-create/'});
-            archive.on('error', function(err){console.log(err)});
-            archive.finalize();
+          archive.pipe(fileOutput);
+          archive.glob("**/*", {cwd: 'uploads/' + cookie + '-create/'});
+          archive.on('error', function(err){console.log(err)});
+          archive.finalize();
 
-            
-            fileOutput.on('close', function () {
-                console.log(archive.pointer() + ' total bytes');
-                console.log('Done Step 4');
-                cleanup.cleanByCookie(cookie);
-                cleanFileWriting();
-                res.send('/pack/' + cookie + '.zip');
-            });
-
+          
+          fileOutput.on('close', function () {
+            console.log(archive.pointer() + ' total bytes');
+            console.log('Done Step 4');
+            cleanup.cleanByCookie(cookie);
+            cleanFileWriting();
+            res.send('/pack/' + cookie + '.zip');
           });
+
         });
       });
-
-
-
-
-
-
     });
+
+
+
+
+
 
   });
 }
