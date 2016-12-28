@@ -15,7 +15,7 @@ module.exports = {
       var stats = fs.statSync(file);
       var fileTime = parseInt(new Date(stats.mtime).getTime() / 1000);
       var currTime = parseInt(Date.now() / 1000);
-      if (currTime - fileTime > 200 && file !== 'uploads/default') {
+      if (currTime - fileTime > 600 && file !== 'uploads/default') {
         rmdir(file,()=>{console.log('cleaned up ', file, '.zip by expiration',　currTime - fileTime)})
         // fs.unlink('public/pack/' + file,()=>{console.log('cleaned up ', file, '.zip by expiration',　currTime - fileTime)})
       }

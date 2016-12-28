@@ -220,29 +220,27 @@ module.exports = function(res, cookie) {
             console.log('Done Step 3');
 
             // Create a zip archive
-            var randomNum = parseInt(Math.random() * 1000); // Bugfix. Same user multi uploads bugs out
-            var fileName =   'public/pack/' + cookie + '-' + randomNum + '.zip';
-            console.log('step 3.1');
+            var fileName =   'public/pack/' + cookie + '.zip';
             var fileOutput = fs.createWriteStream(fileName);
-            console.log('step 3.2');
+            var cleanFileWriting = function() {
+              // This function performs cleanup which would otherwise cause bugs
+              archive = archiver('zip');
+              fileOutput = undefined;
+            }
 
             archive.pipe(fileOutput);
-            console.log('step 3.3');
             archive.glob("**/*", {cwd: 'uploads/' + cookie + '-create/'});
-            console.log('step 3.4');
-            archive.on('error', function(err){throw err;});
-            console.log('step 3.5');
+            archive.on('error', function(err){console.log(err)});
             archive.finalize();
-            console.log('step 3.6');
+
             
             fileOutput.on('close', function () {
-                console.log('step 3.7');
                 console.log(archive.pointer() + ' total bytes');
                 console.log('Done Step 4');
                 cleanup.cleanByCookie(cookie);
-                res.send('/pack/' + cookie + '-' + randomNum + '.zip');
+                cleanFileWriting();
+                res.send('/pack/' + cookie + '.zip');
             });
-            console.log('step 3.8');
 
           });
         });

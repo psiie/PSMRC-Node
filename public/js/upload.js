@@ -62,6 +62,7 @@ function downloadPack() {
     error: e => {console.log(e)},
     success: (data)=>{
       console.log(data);
+      $("#upload-input").replaceWith($("#upload-input").val('').clone(true)); // Bugfix to allow multiple successive uploads
       window.location.href = data;
     }
 
