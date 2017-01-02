@@ -34,7 +34,7 @@ module.exports = {
       console.log('yes, cleanup existing file');
       fs.unlink(__dirname + '/public/pack/' + cookie + '.zip', ()=>{console.log('cleaned up existing file')})
     } else {
-      console.log('couldn\' find zip', __dirname + '/public/pack/' + cookie + '.zip');
+      console.log('not and error: couldn\' find zip', __dirname + '/public/pack/' + cookie + '.zip');
     }
   }
 }

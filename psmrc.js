@@ -186,8 +186,8 @@ module.exports = function(res, cookie) {
   
   // cookie = 'override';
   try {
-    fs.createReadStream('uploads/' + cookie)
-      .pipe( unzip.Extract({ path: 'uploads/' + cookie + '-unzip' }) )
+    fs.createReadStream(__dirname + '/uploads/' + cookie)
+      .pipe( unzip.Extract({ path: __dirname + '/uploads/' + cookie + '-unzip' }) )
       // .on('finish', () => {fixNested().then( () => {} )}
       .on('finish', () => {
         console.log('finished unzip');
@@ -206,7 +206,7 @@ function process(res, cookie) {
   console.log('1');
   // Organize an output folder
   // Create specific user's cookie folder first
-  importDirectory = 'uploads/' + cookie;
+  importDirectory = __dirname + '/uploads/' + cookie;
   console.log('2');
   fs.mkdir(importDirectory + '-create', (err) => {
     console.log('3');
@@ -236,7 +236,7 @@ function process(res, cookie) {
           console.log('Done Step 3');
 
           // Create a zip archive
-          var fileName =   'public/pack/' + cookie + '.zip';
+          var fileName = __dirname + '/public/pack/' + cookie + '.zip';
           var fileOutput = fs.createWriteStream(fileName);
           var cleanFileWriting = function() {
             // This function performs cleanup which would otherwise cause bugs
@@ -245,7 +245,7 @@ function process(res, cookie) {
           }
 
           archive.pipe(fileOutput);
-          archive.glob("**/*", {cwd: 'uploads/' + cookie + '-create/'});
+          archive.glob("**/*", {cwd: __dirname + '/uploads/' + cookie + '-create/'});
           archive.on('error', function(err){console.log(err)});
           archive.finalize();
 
