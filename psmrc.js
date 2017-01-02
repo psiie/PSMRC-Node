@@ -24,7 +24,7 @@ var layout = [
 
 function makeLayout(folder, cookie) {
   if (!fs.existsSync(folder)) {
-    fs.mkdir('uploads/' + cookie + '-create' + folder, ()=>console.log('created dir'));
+    fs.mkdir(__dirname + '/uploads/' + cookie + '-create' + folder, ()=>console.log('created dir'));
   }
 }
 
@@ -53,15 +53,17 @@ function findImportDirectory() {
 function findPNG(shortDirectory) {
   return new Promise( (resolve, reject) => {
     let userDir = importDirectory + '-unzip/assets/minecraft/textures/' + shortDirectory;
-    let defaultDir = './uploads/default/assets/minecraft/textures/' + shortDirectory;
-    // if (false) {
+    let defaultDir = __dirname + '/uploads/default/assets/minecraft/textures/' + shortDirectory;
     if (fs.existsSync(userDir)) {
       resolve(userDir);
     } else if (fs.existsSync(defaultDir)) {
       resolve(defaultDir);
     } else {
       console.log("!!!ERROR!!! Report this filename: \"", shortDirectory, "\"");
-      resolve('./uploads/default/404.png');
+      console.log('importDir is: ', importDirectory);
+      console.log('userDir: ', userDir);
+      console.log('defaultDir: ', defaultDir);
+      resolve(__dirname + '/uploads/default/404.png');
     }
   })
 
