@@ -197,7 +197,7 @@ module.exports = function(res, cookie) {
       });
   } catch(e) {
     res.statusCode = 500;
-    res.send('couldn\'t read the zip file uploaded');
+    res.send('Error: ' + e);
   }
 }
 
