@@ -59,7 +59,10 @@ function downloadPack() {
   $.ajax({
     url: '/download',
     type: 'GET',
-    error: e => {console.log(e)},
+    error: e => {
+      $('.progress-bar')[0].innerText = "Error: " + e;
+      $($('.btn.btn-lg.upload-btn')[0]).attr('disabled', true);
+    },
     success: (data)=>{
       console.log(data);
       $("#upload-input").replaceWith($("#upload-input").val('').clone(true)); // Bugfix to allow multiple successive uploads

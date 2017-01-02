@@ -185,16 +185,20 @@ module.exports = function(res, cookie) {
   cleanup.cleanExistingZip(cookie);
   
   // cookie = 'override';
-
-  fs.createReadStream('uploads/' + cookie)
-  .pipe( unzip.Extract({ path: 'uploads/' + cookie + '-unzip' }) )
-  // .on('finish', () => {fixNested().then( () => {} )}
-  .on('finish', () => {
-    console.log('finished unzip');
-    fixNested(cookie).then( () => {
-      console.log('outside fixnested');
-      process(res, cookie)} )
-  });
+  try {
+    fs.createReadStream('uploads/' + cookie)
+      .pipe( unzip.Extract({ path: 'uploads/' + cookie + '-unzip' }) )
+      // .on('finish', () => {fixNested().then( () => {} )}
+      .on('finish', () => {
+        console.log('finished unzip');
+        fixNested(cookie).then( () => {
+          console.log('outside fixnested');
+          process(res, cookie)} )
+      });
+  } catch(e) {
+    res.statusCode = 500;
+    res.send('couldn\'t read the zip file uploaded');
+  }
 }
 
 function process(res, cookie) {
