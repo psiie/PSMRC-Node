@@ -25,7 +25,11 @@ module.exports = function(cookie) {
       mvFileList.forEach( file => {
         var oldPath = 'uploads/' + cookie + '-unzip/' + bestCandidate + '/' + file;
         var newPath = 'uploads/' + cookie + '-unzip/' + file;
-        fs.renameSync(oldPath, newPath);
+        try {
+          fs.renameSync(oldPath, newPath);
+        } catch(e) {
+          console.log('++++++++++++++++++++++++couldn\' rename ', oldPath);
+        }
         console.log('renamed ', file);
       });
       console.log('done renaming. resolving');

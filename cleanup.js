@@ -32,7 +32,14 @@ module.exports = {
     console.log('inside cleanExistingZip');
     if (fs.existsSync('public/pack/' + cookie + '.zip')) {
       console.log('yes, cleanup existing file');
-      fs.unlink('public/pack/' + cookie + '.zip', ()=>{console.log('cleaned up existing file')})
+      try {
+        console.log('c1');
+        fs.unlink('public/pack/' + cookie + '.zip', ()=>{console.log('cleaned up existing file')})
+        console.log('c1.5');
+      } catch(e) {
+        console.log('c2');
+        console.log('somehow lost the file between the check and the delete :S');
+      }
     } else {
       console.log('couldn\' find zip', 'public/pack/' + cookie + '.zip');
     }

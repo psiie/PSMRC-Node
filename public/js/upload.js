@@ -25,7 +25,7 @@ $('#upload-input').on('change', function(){
         contentType: false,
         success: function(data){
             console.log('upload successful!');
-            downloadPack();
+            setTimeout(downloadPack, 500);
         },
         xhr: function() {
           // create an XMLHttpRequest
