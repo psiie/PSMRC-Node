@@ -72,6 +72,6 @@ app.post('/upload', function(req, res){
   form.parse(req); // parse the incoming request containing the form data
 });
 
-var server = app.listen(8080, function(){
+var server = app.listen(80, function(){
   console.log('Server listening on port 8080');
 });
