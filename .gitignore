@@ -1,8 +1,4 @@
-!uploads/fallback
-!uploads/fallback_debug
-uploads/fallback/*.zip
-public/pack/*.zip
-!public/pack/.keep
+
 # Created by https://www.gitignore.io/api/node,osx
 
 ### Node ###
