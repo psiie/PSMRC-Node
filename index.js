@@ -33,7 +33,7 @@ app.get('/', function(req, res){
 
 
 app.get('/download', function(req, res) {
-  console.log('Express: initiating PSMRC. Will reply with download link');
+  console.log('Express: initiating PSMRC. Will reply with download link.', req.cookies.cookieName);
   psmrc(res, req.cookies.cookieName);
 });
 

@@ -44,7 +44,7 @@ $('#upload-input').on('change', function(){
 
               // once the upload reaches 100%, set the progress bar text to done
               if (percentComplete === 100) {
-                $('.progress-bar').html('Done');
+                $('.progress-bar').html('Done Uploading. Please Wait. May take up to 2 minutes');
               }
             }
           }, false);
@@ -59,6 +59,7 @@ function downloadPack() {
   $.ajax({
     url: '/download',
     type: 'GET',
+    timeout: 0,
     error: e => {
       $('.progress-bar')[0].innerText = "Error: " + e;
       $($('.btn.btn-lg.upload-btn')[0]).attr('disabled', true);
