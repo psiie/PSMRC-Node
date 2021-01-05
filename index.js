@@ -5,8 +5,7 @@ var formidable = require('formidable');
 var cookieParser = require('cookie-parser');
 var psmrc = require('./psmrc');
 var cleanup = require('./cleanup');
-var fs = require('fs');
-
+var fs = require('fs-extra');
 
 // Cookie creation middleware
 app.use(cookieParser());
@@ -29,19 +28,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', function(req, res){
   console.log('app get / cookie', req.cookies.cookieName);
-  // psmrc(res, req.cookies.cookieName);
   res.sendFile(path.join(__dirname, 'views/index.html'));
 });
 
-// app.get('/test', function(req, res) {
-//   fixNested(req.cookies.cookieName)
-//     .then( () => {
-//       res.send('done')
-//     })
-//     .catch( () => 
-//       res.send('empty zip file :(') 
-//     )
-// })
 
 app.get('/download', function(req, res) {
   console.log('initiating PSMRC. Will reply with download link');
@@ -72,6 +61,6 @@ app.post('/upload', function(req, res){
   form.parse(req); // parse the incoming request containing the form data
 });
 
-var server = app.listen(process.env.PORT || 3000, function(){
+app.listen(process.env.PORT || 3000, function(){
   console.log('Server listening on port');
 });

@@ -1,14 +1,14 @@
-var fs = require('fs');
-var unzip = require('unzip');
+var fs = require('fs-extra');
+var unzip = require('unzipper');
 var archiver = require('archiver');
 var archive = archiver('zip');
 var cleanup = require('./cleanup');
 var gm = require('gm').subClass({imageMagick: true});
+const path = require('path');
 var fixNested = require('./fixNested');
 var blockSprites = require('./sprites-block');
 var itemSprites = require('./sprites-item');
 var singleSprites = require('./sprites-single');
-// var importDirectory = findImportDirectory(); // Declare so find only runs once
 var importDirectory;
 var layout = [
   // '/armor',
@@ -24,67 +24,34 @@ var layout = [
 
 function makeLayout(folder, cookie) {
   if (!fs.existsSync(folder)) {
-    fs.mkdir(__dirname + '/uploads/' + cookie + '-create' + folder, ()=>console.log('created dir'));
+    fs.mkdir(__dirname + '/uploads/' + cookie + '-create' + folder, () => console.log('created dir'));
   }
 }
 
-// depricated now that dir is automatically renamed to cookie
-function findImportDirectory() {
-  console.log('running findImportDirectory :\\');
-  // Returns a promise with the most likely folder to be importing
-  var dir = new Promise((resolve, reject) => {
-    fs.readdir('./import/', (err, list) => {
-      if (err) {
-        console.log('error: ', err);
-        reject(err)
-      }
-      else {resolve(list)}
-    })
-  });
-  return dir.then(list => {
-    var mostLikely = 'default';
-    list.forEach(i=>{ // Cycle through each folder. If not hidden or 'default'
-      if (i !== 'default' && i[0] !== '.') {mostLikely = i}
-    });
-    return mostLikely;
-  });
-}
-
-function findPNG(shortDirectory) {
+function findPNG(shortDirectory, filename, index /* optional */) {
   return new Promise( (resolve, reject) => {
-    let userDir = importDirectory + '-unzip/assets/minecraft/textures/' + shortDirectory;
-    let defaultDir = __dirname + '/uploads/default/assets/minecraft/textures/' + shortDirectory;
+    const debug = false;
+    const userDir = importDirectory + '-unzip/assets/minecraft/textures/' + shortDirectory + filename;
+    const fallbackDir = path.join(
+      __dirname,
+      debug ? '/uploads/fallback_debug/' : '/uploads/fallback/',
+      shortDirectory,
+      `${index}.png`,
+    );
+    console.log('a');
+    
+    // console.log('fallbackdir', fallbackDir)
     if (fs.existsSync(userDir)) {
       resolve(userDir);
-    } else if (fs.existsSync(defaultDir)) {
-      resolve(defaultDir);
+    } else if (fs.existsSync(fallbackDir)) {
+      resolve(fallbackDir);
     } else {
-      console.log("!!!ERROR!!! Report this filename: \"", shortDirectory, "\"");
-      console.log('importDir is: ', importDirectory);
-      console.log('userDir: ', userDir);
-      console.log('defaultDir: ', defaultDir);
-      resolve(__dirname + '/uploads/default/404.png');
+      console.log('  ! Could not fallback for this texture:', filename, index);
+      resolve(__dirname + '/uploads/fallback/404.png');
     }
   })
 
 }
-
-// function findPNG(shortDirectory) {
-//   // Returns either the imported texturepack path or the default path
-//   return importDirectory.then(dir => {
-//     let userDir = importDirectory + '/import/' + dir + '/assets/minecraft/textures/' + shortDirectory;
-//     let defaultDir = importDirectory + '/import/default/assets/minecraft/textures/' + shortDirectory;
-//     // if (false) {
-//     if (fs.existsSync(userDir)) {
-//       return userDir;
-//     } else if (fs.existsSync(defaultDir)) {
-//       return defaultDir;
-//     } else {
-//       console.log("!!!ERROR!!! Report this filename: \"", shortDirectory, "\"");
-//       return './import/default/404.png';
-//     }
-//   })
-// }
 
 // ----------------- Imagemagick Functions ----------------- //
 
@@ -93,19 +60,21 @@ function montageEach(spritesheet, sprites, sheetSize, folder, savename) {
     // Recursive function to allow successive Promises to resolve in sequence
     let counter = 0;
     let apply = function(spritesheet, sprites) {
-      findPNG(folder + sprites[counter]).then(dir => {
+      findPNG(folder, sprites[counter], counter).then(dir => {
         spritesheet.montage(dir);
         if (counter < sprites.length-1) {
           counter += 1;
           apply(spritesheet, sprites);
-        } else {
-          saveSheet(spritesheet, savename, sheetSize)
-            .then(()=>{ resolve() })
+
+          return;
         }
+
+        saveSheet(spritesheet, savename, sheetSize).then(() => resolve())
       });
     }
+
     apply(spritesheet, sprites);
-  })
+  });
 
 }
 
@@ -115,7 +84,7 @@ function moveAndConvert() {
     let counter = 0;
     let apply = function() {
       if (counter < singleSprites.length) {
-        findPNG(singleSprites[counter][2]).then(dir => {
+        findPNG('', singleSprites[counter][2]).then(dir => {
           if (dir == './uploads/default/404.png') {
             console.log('missing ', singleSprites[counter[2]], 'skipping...');
             counter += 1;
@@ -204,14 +173,10 @@ module.exports = function(res, cookie) {
 }
 
 function process(res, cookie) {
-  console.log('+++ indise process');
-  console.log('1');
   // Organize an output folder
   // Create specific user's cookie folder first
   importDirectory = __dirname + '/uploads/' + cookie;
-  console.log('2');
   fs.mkdir(importDirectory + '-create', (err) => {
-    console.log('3');
     if (err) {console.log('err', err);}
 
     // Create layout inside user's cookie folder
@@ -223,19 +188,19 @@ function process(res, cookie) {
     // creation should always take longer. It's not waiting for completion
     // Create item & terrain spritesheet
 
-    var blockSpritesheet = gm(256,512).bitdepth(8).background('transparent');
-    var itemSpritesheet = gm(256,256).bitdepth(8).background('transparent');
-    montageEach(blockSpritesheet, blockSprites, '16x32', 'blocks/', 'terrain.png')
+    var blockSpritesheet = gm(256,544).bitdepth(8).background('transparent');
+    var itemSpritesheet = gm(256,272).bitdepth(8).background('transparent');
+    console.log('1');
+    montageEach(blockSpritesheet, blockSprites, '16x34', 'block/', 'terrain.png')
     .then( () => { 
-      console.log('Done Step 1');
-      
-      montageEach(itemSpritesheet, itemSprites, '16x16', 'items/', 'items.png')
+      console.log('2');
+      montageEach(itemSpritesheet, itemSprites, '16x17', 'item/', 'items.png')
       .then( () => { 
-        console.log('Done Step 2'); 
+        console.log('3');
         // Copy Destroy Stages 0-9
         moveAndConvert()
         .then( ()=> {
-          console.log('Done Step 3');
+          console.log('4');
 
           // Create a zip archive
           var fileName = __dirname + '/public/pack/' + cookie + '.zip';
@@ -247,15 +212,16 @@ function process(res, cookie) {
           }
 
           archive.pipe(fileOutput);
-          archive.glob("**/*", {cwd: __dirname + '/uploads/' + cookie + '-create/'});
+          archive.glob("**/*", { cwd: path.join(__dirname, '/uploads/', cookie, '-create/') });
           archive.on('error', function(err){console.log(err)});
           archive.finalize();
 
-          
+          console.log('5');
           fileOutput.on('close', function () {
+            console.log('6');
             console.log(archive.pointer() + ' total bytes');
             console.log('Done Step 4');
-            cleanup.cleanByCookie(cookie);
+            cleanup.cleanByCookie(cookie); // todo: re-enable
             cleanFileWriting();
             res.send('/pack/' + cookie + '.zip');
           });

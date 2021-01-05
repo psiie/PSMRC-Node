@@ -14,9 +14,10 @@
     "cookie-parser": "^1.4.3",
     "express": "^4.14.0",
     "formidable": "^1.0.17",
-    "fs": "0.0.1-security",
+    "fs-extra": "^9.0.1",
     "gm": "^1.23.0",
+    "path": "^0.12.7",
     "rmdir": "^1.2.0",
-    "unzip": "^0.1.11"
+    "unzipper": "^0.10.11"
   }
 }

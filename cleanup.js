@@ -1,5 +1,6 @@
-var fs = require('fs');
+var fs = require('fs-extra');
 var rmdir = require('rmdir');
+const path = require('path');
 
 module.exports = {
 
@@ -15,7 +16,11 @@ module.exports = {
       var stats = fs.statSync(file);
       var fileTime = parseInt(new Date(stats.mtime).getTime() / 1000);
       var currTime = parseInt(Date.now() / 1000);
-      if (currTime - fileTime > 600 && file !== __dirname + '/uploads/default') {
+
+      if (file === path.join(__dirname, '/uploads/fallback')) return;
+      if (file === path.join(__dirname, '/uploads/fallback_debug')) return;
+      
+      if (currTime - fileTime > 600) {
         rmdir(file,()=>{console.log('cleaned up ', file, '.zip by expiration',　currTime - fileTime)})
         // fs.unlink('public/pack/' + file,()=>{console.log('cleaned up ', file, '.zip by expiration',　currTime - fileTime)})
       }

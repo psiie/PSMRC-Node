@@ -1,4 +1,4 @@
-var fs = require('fs');
+var fs = require('fs-extra');
 
 module.exports = function(cookie) {
   console.log('inside fixNested');
