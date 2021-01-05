@@ -8,23 +8,27 @@ const path = require('path');
 var fixNested = require('./fixNested');
 var blockSprites = require('./sprites-block');
 var itemSprites = require('./sprites-item');
-var singleSprites = require('./sprites-single');
+var singleSprites = require('./sprites-single'); // todo: deprecated?
 var importDirectory;
+var exportDirectory;
 var layout = [
   // '/armor',
   // '/font',
   // '/item',
   // '/misc',
   // '/mob',
-  '/art',
-  '/textures'
+  // '/art',
+  // '/textures'
 ]
 
 // ----------------- Directory Functions ----------------- //
 
+// todo: deprecated?
 function makeLayout(folder, cookie) {
   if (!fs.existsSync(folder)) {
-    fs.mkdir(__dirname + '/uploads/' + cookie + '-create' + folder, () => console.log('created dir'));
+    fs.mkdir(path.join(exportDirectory, folder), () => {
+      console.log('Psmrc.js: created dir')
+    });
   }
 }
 
@@ -38,15 +42,12 @@ function findPNG(shortDirectory, filename, index /* optional */) {
       shortDirectory,
       `${index}.png`,
     );
-    console.log('a');
     
-    // console.log('fallbackdir', fallbackDir)
     if (fs.existsSync(userDir)) {
       resolve(userDir);
     } else if (fs.existsSync(fallbackDir)) {
       resolve(fallbackDir);
     } else {
-      console.log('  ! Could not fallback for this texture:', filename, index);
       resolve(__dirname + '/uploads/fallback/404.png');
     }
   })
@@ -86,7 +87,7 @@ function moveAndConvert() {
       if (counter < singleSprites.length) {
         findPNG('', singleSprites[counter][2]).then(dir => {
           if (dir == './uploads/default/404.png') {
-            console.log('missing ', singleSprites[counter[2]], 'skipping...');
+            console.log('Psmrc.js: missing ', singleSprites[counter[2]], 'skipping...');
             counter += 1;
             apply();
           } else {
@@ -95,9 +96,9 @@ function moveAndConvert() {
               .bitdepth(8)
               .background('transparent')
               .write(importDirectory + '-create/' + singleSprites[counter][3], err => {
-                if (err) {console.log('error writing on ' + counter + '[3]:', err)
+                if (err) {console.log('Psmrc.js: error writing on ' + counter + '[3]:', err)
                 } else {
-                  console.log('written ' + singleSprites[counter][3]);
+                  console.log('Psmrc.js: written ' + singleSprites[counter][3]);
                   counter += 1;
                   apply();
                 }
@@ -114,33 +115,31 @@ function moveAndConvert() {
 
 function saveSheet(spritesheet, filename, size) {
   return new Promise( (resolve, reject) => {
-    console.log('ran saver function');
     
     if (filename == 'terrain.png') {
       // Only terrain.png has MipMapLevels
       spritesheet
         .geometry('8x8+0+0').tile(size)
-        .write(importDirectory + '-create/terrainMipMapLevel2.png', (err) => {
-          if (err) {console.log(err);}
-          else {console.log('written terrainMipMapLevel2')} 
+        .write(path.join(exportDirectory, 'terrainMipMapLevel2.png'), (err) => {
+          if (err) console.log('Psmrc.js: spritesheet Error: ', err);
+          else console.log('Psmrc.js: written terrainMipMapLevel2')
         })
 
       spritesheet
         .geometry('4x4+0+0').tile(size)
-        .write(importDirectory + '-create/terrainMipMapLevel3.png', (err) => {
-          if (err) {console.log(err);}
-          else {console.log('written terrainMipMapLevel3')} 
+        .write(path.join(exportDirectory, 'terrainMipMapLevel3.png'), (err) => {
+          if (err) console.log('Psmrc.js: spritesheet Error: ', err);
+          else console.log('Psmrc.js: written terrainMipMapLevel3')
         })  
     }
 
     spritesheet
-      .geometry('16x16+0+0').tile(size)
-      .write(importDirectory + '-create/' + filename, (err) => {
-        if (err) {console.log(err);}
+      .geometry('15x15+0+0').tile(size)
+      .write(path.join(exportDirectory, filename), (err) => {
+        if (err) console.log('Psmrc.js: spritesheet Error: ', err);
         else {
-          console.log('written', filename);
+          console.log('Psmrc.js: written', filename);
           resolve();
-          // setTimeout(()=>{console.log('resolving');resolve()},1000)
         } 
       })
 
@@ -161,9 +160,8 @@ module.exports = function(res, cookie) {
       .pipe( unzip.Extract({ path: __dirname + '/uploads/' + cookie + '-unzip' }) )
       // .on('finish', () => {fixNested().then( () => {} )}
       .on('finish', () => {
-        console.log('finished unzip');
-        fixNested(cookie).then( () => {
-          console.log('outside fixnested');
+        console.log('Psmrc.js: finished unzip');
+        fixNested(cookie).then(() => {
           process(res, cookie)} )
       });
   } catch(e) {
@@ -176,8 +174,9 @@ function process(res, cookie) {
   // Organize an output folder
   // Create specific user's cookie folder first
   importDirectory = __dirname + '/uploads/' + cookie;
-  fs.mkdir(importDirectory + '-create', (err) => {
-    if (err) {console.log('err', err);}
+  exportDirectory = path.join(__dirname, '/uploads/', `${cookie}-create`, 'rePatch/PCSE00491/Common/res/TitleUpdate/res');
+  fs.mkdirp(exportDirectory, (err) => {
+    if (err) {console.log('Psmrc.js: process err', err);}
 
     // Create layout inside user's cookie folder
     layout.forEach((i)=>{
@@ -190,17 +189,14 @@ function process(res, cookie) {
 
     var blockSpritesheet = gm(256,544).bitdepth(8).background('transparent');
     var itemSpritesheet = gm(256,272).bitdepth(8).background('transparent');
-    console.log('1');
+
     montageEach(blockSpritesheet, blockSprites, '16x34', 'block/', 'terrain.png')
     .then( () => { 
-      console.log('2');
       montageEach(itemSpritesheet, itemSprites, '16x17', 'item/', 'items.png')
       .then( () => { 
-        console.log('3');
         // Copy Destroy Stages 0-9
         moveAndConvert()
         .then( ()=> {
-          console.log('4');
 
           // Create a zip archive
           var fileName = __dirname + '/public/pack/' + cookie + '.zip';
@@ -212,16 +208,13 @@ function process(res, cookie) {
           }
 
           archive.pipe(fileOutput);
-          archive.glob("**/*", { cwd: path.join(__dirname, '/uploads/', cookie, '-create/') });
-          archive.on('error', function(err){console.log(err)});
+          archive.glob("**/*", { cwd: path.join(__dirname, '/uploads/', `${cookie}-create/`) });
+          archive.on('error', function(err){console.log('Psmrc.js: archive.on()', err)});
           archive.finalize();
 
-          console.log('5');
           fileOutput.on('close', function () {
-            console.log('6');
-            console.log(archive.pointer() + ' total bytes');
-            console.log('Done Step 4');
-            cleanup.cleanByCookie(cookie); // todo: re-enable
+            console.log('Psmrc.js: ', archive.pointer() + ' total bytes');
+            cleanup.cleanByCookie(cookie);
             cleanFileWriting();
             res.send('/pack/' + cookie + '.zip');
           });
@@ -229,11 +222,6 @@ function process(res, cookie) {
         });
       });
     });
-
-
-
-
-
 
   });
 }

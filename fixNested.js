@@ -1,11 +1,9 @@
 var fs = require('fs-extra');
 
 module.exports = function(cookie) {
-  console.log('inside fixNested');
   return new Promise( (resolve, reject) => {
     var files = fs.readdirSync(__dirname + '/uploads/' + cookie + '-unzip')
     var bestCandidate = '';
-    console.log(files);
 
     if (files.indexOf('assets') === -1) {
       

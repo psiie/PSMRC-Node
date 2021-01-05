@@ -16,9 +16,9 @@ app.use(function(req, res, next) {
     randomNumber=randomNumber.substring(2,randomNumber.length);
     res.cookie('cookieName',randomNumber, { maxAge: 900000, httpOnly: true });
     req.cookies.cookieName = randomNumber;
-    console.log('cookie created successfully', randomNumber);
+    console.log(`Expresss: cookie created successfully: ${randomNumber}`);
   } else {
-    console.log('cookie exists', cookie);
+    console.log(`Express: cookie exists: ${cookie}`);
   }
   next();
 });
@@ -27,21 +27,21 @@ app.use(express.static(path.join(__dirname, 'public')));
 // ––––––––––– Paths ––––––––––– //
 
 app.get('/', function(req, res){
-  console.log('app get / cookie', req.cookies.cookieName);
+  console.log('Express: app get / cookie', req.cookies.cookieName);
   res.sendFile(path.join(__dirname, 'views/index.html'));
 });
 
 
 app.get('/download', function(req, res) {
-  console.log('initiating PSMRC. Will reply with download link');
+  console.log('Express: initiating PSMRC. Will reply with download link');
   psmrc(res, req.cookies.cookieName);
 });
 
 app.post('/upload', function(req, res){
-  console.log('Attempting CleanupByExpiration');
+  console.log('Express: Attempting cleanByExpiration()');
   cleanup.cleanByExpiration();
 
-  console.log('UPLOAD COOKIE ', req.cookies);
+  console.log('Express: upload cookie ', req.cookies);
   var form = new formidable.IncomingForm(); // create an incoming form object
   form.multiples = true; // specify that we want to allow the user to upload multiple files in a single request
   form.uploadDir = path.join(__dirname, '/uploads'); // store all uploads in the /uploads directory
@@ -51,7 +51,7 @@ app.post('/upload', function(req, res){
   });
 
   form.on('error', function(err) {
-    console.log('An error has occured: \n' + err);
+    console.log('Express: An error has occured: \n' + err);
   });
 
   form.on('end', function() { // once all the files have been uploaded, send a response to the client
@@ -62,5 +62,5 @@ app.post('/upload', function(req, res){
 });
 
 app.listen(process.env.PORT || 3000, function(){
-  console.log('Server listening on port');
+  console.log('Express: Server listening on port');
 });
