@@ -56,7 +56,7 @@ function findPNG(shortDirectory, filename, index /* optional */) {
 
 // ----------------- Imagemagick Functions ----------------- //
 
-function montageEach(spritesheet, sprites, sheetSize, folder, savename) {
+function montageEach(spritesheet, sprites, sheetSize, folder, savename, smoothing) {
   return new Promise( (resolve, reject) => {
     // Recursive function to allow successive Promises to resolve in sequence
     let counter = 0;
@@ -70,7 +70,7 @@ function montageEach(spritesheet, sprites, sheetSize, folder, savename) {
           return;
         }
 
-        saveSheet(spritesheet, savename, sheetSize).then(() => resolve())
+        saveSheet(spritesheet, savename, sheetSize, smoothing).then(() => resolve())
       });
     }
 
@@ -113,7 +113,7 @@ function moveAndConvert() {
   })
 }
 
-function saveSheet(spritesheet, filename, size) {
+function saveSheet(spritesheet, filename, size, smoothing) {
   return new Promise( (resolve, reject) => {
     
     if (filename == 'terrain.png') {
@@ -135,6 +135,7 @@ function saveSheet(spritesheet, filename, size) {
 
     spritesheet
       .geometry('15x15+0+0').tile(size)
+      .filter(smoothing === 'true' ? 'Lanczos' : 'Point') // scales down without antialiasing
       .write(path.join(exportDirectory, filename), (err) => {
         if (err) console.log('Psmrc.js: spritesheet Error: ', err);
         else {
@@ -150,7 +151,7 @@ function saveSheet(spritesheet, filename, size) {
 
 // ----------------- MAIN ----------------- //
 
-module.exports = function(res, cookie) {
+module.exports = function(res, cookie, options = {}) {
   if (!cookie) {return -1}
   cleanup.cleanExistingZip(cookie);
   
@@ -162,7 +163,7 @@ module.exports = function(res, cookie) {
       .on('finish', () => {
         console.log('Psmrc.js: finished unzip');
         fixNested(cookie).then(() => {
-          process(res, cookie)} )
+          process(res, cookie, options)} )
       });
   } catch(e) {
     res.statusCode = 500;
@@ -170,7 +171,8 @@ module.exports = function(res, cookie) {
   }
 }
 
-function process(res, cookie) {
+function process(res, cookie, options) {
+  const { smoothing } = options;
   // Organize an output folder
   // Create specific user's cookie folder first
   importDirectory = __dirname + '/uploads/' + cookie;
@@ -190,9 +192,9 @@ function process(res, cookie) {
     var blockSpritesheet = gm(256,544).bitdepth(8).background('transparent');
     var itemSpritesheet = gm(256,272).bitdepth(8).background('transparent');
 
-    montageEach(blockSpritesheet, blockSprites, '16x34', 'block/', 'terrain.png')
+    montageEach(blockSpritesheet, blockSprites, '16x34', 'block/', 'terrain.png', smoothing)
     .then( () => { 
-      montageEach(itemSpritesheet, itemSprites, '16x17', 'item/', 'items.png')
+      montageEach(itemSpritesheet, itemSprites, '16x17', 'item/', 'items.png', smoothing)
       .then( () => { 
         // Copy Destroy Stages 0-9
         moveAndConvert()

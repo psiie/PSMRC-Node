@@ -39,6 +39,8 @@ app.get('/check', function(req, res) {
 });
 
 app.post('/upload', function(req, res){
+  const { smoothing } = req.query;
+  console.log('req smoothing', smoothing)
   console.log('Express: Attempting cleanByExpiration()');
   cleanup.cleanByExpiration();
 
@@ -57,7 +59,7 @@ app.post('/upload', function(req, res){
 
   form.on('end', function() { // once all the files have been uploaded, send a response to the client
     res.end('success');
-    psmrc(res, req.cookies.cookieName);
+    psmrc(res, req.cookies.cookieName, { smoothing });
   });
 
   form.parse(req); // parse the incoming request containing the form data

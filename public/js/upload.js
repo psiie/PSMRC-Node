@@ -8,6 +8,8 @@ $(".upload-btn").on("click", function () {
 });
 
 $("#upload-input").on("change", function () {
+  const smoothing = $('#smoothing')[0].checked;
+  console.log('-------- smoothing', smoothing);
   const files = $(this).get(0).files;
   const xhrModifier = () => {
     const xmlHttpRequest = new XMLHttpRequest();
@@ -41,7 +43,7 @@ $("#upload-input").on("change", function () {
   }
 
   $.ajax({
-    url: "/upload",
+    url: `/upload?smoothing=${smoothing}`,
     type: "POST",
     data: formData,
     processData: false,
