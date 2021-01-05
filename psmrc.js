@@ -216,8 +216,8 @@ function process(res, cookie) {
             console.log('Psmrc.js: ', archive.pointer() + ' total bytes');
             cleanup.cleanByCookie(cookie);
             cleanFileWriting();
-            console.log('Psmrc.js: sending pack back');
-            res.send('/pack/' + cookie + '.zip');
+            // console.log('Psmrc.js: sending pack back');
+            // res.send('/pack/' + cookie + '.zip');
           });
 
         });

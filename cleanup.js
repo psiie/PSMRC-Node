@@ -18,7 +18,7 @@ module.exports = {
 
       if (/fallback/.test(file)) return; // never delete fallback folder(s)
       
-      if ((currTime - fileTime) > 600) {
+      if ((currTime - fileTime) > 1800) {
         rmdir(file, () => console.log(`Cleanup: deleted ${file} by experation. ${currTime - fileTime}`))
       }
     }

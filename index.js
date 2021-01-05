@@ -16,10 +16,8 @@ app.use(function(req, res, next) {
     randomNumber=randomNumber.substring(2,randomNumber.length);
     res.cookie('cookieName',randomNumber, { maxAge: 900000, httpOnly: true });
     req.cookies.cookieName = randomNumber;
-    console.log(`Expresss: cookie created successfully: ${randomNumber}`);
-  } else {
-    console.log(`Express: cookie exists: ${cookie}`);
   }
+
   next();
 });
 app.use(express.static(path.join(__dirname, 'public')));
@@ -31,10 +29,13 @@ app.get('/', function(req, res){
   res.sendFile(path.join(__dirname, 'views/index.html'));
 });
 
+app.get('/check', function(req, res) {
+  const { cookieName } = req.cookies;
+  const isReady = fs.existsSync(path.join(__dirname, '/public/pack/', `${cookieName}.zip`));
+  
+  const downloadUrl = `/pack/${cookieName}.zip`;
 
-app.get('/download', function(req, res) {
-  console.log('Express: initiating PSMRC. Will reply with download link.', req.cookies.cookieName);
-  psmrc(res, req.cookies.cookieName);
+  res.send(isReady ? downloadUrl : 'false');
 });
 
 app.post('/upload', function(req, res){
@@ -56,6 +57,7 @@ app.post('/upload', function(req, res){
 
   form.on('end', function() { // once all the files have been uploaded, send a response to the client
     res.end('success');
+    psmrc(res, req.cookies.cookieName);
   });
 
   form.parse(req); // parse the incoming request containing the form data
