@@ -1,6 +1,6 @@
 !uploads/fallback
 !uploads/fallback_debug
-uploads/fallback/*
+uploads/fallback/*.zip
 public/pack/*.zip
 # Created by https://www.gitignore.io/api/node,osx
 
