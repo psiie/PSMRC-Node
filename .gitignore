@@ -1,5 +1,5 @@
 uploads/
-public/pack/*
+public/pack/*.zip
 # Created by https://www.gitignore.io/api/node,osx
 
 ### Node ###
