@@ -12,10 +12,12 @@ const HASHES = {
   TERRAIN: [
     'cd7f5ad33c0bb905b66e1ce1b98703fd', // decrypted
     'be55ef4b3753676d711667a977fff19f',
+    '49cabb6cc4d6dd642be54510c82330ed', // extended
   ],
   ITEMS: [
     '28ff716d9d9bab6182b6f4ab8a387f23', //decrypted
     'ecd074225b2d159c8d286006f506b810',
+    '357d7d3a92ad3a7b80f685a5d3080d2e', // extended
   ],
 };
 
