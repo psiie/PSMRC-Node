@@ -134,7 +134,7 @@ function saveSheet(spritesheet, filename, size, smoothing) {
     }
 
     spritesheet
-      .geometry('15x15+0+0').tile(size)
+      .geometry('16x16+0+0').tile(size)
       .filter(smoothing === 'true' ? 'Lanczos' : 'Point') // scales down without antialiasing
       .write(path.join(exportDirectory, filename), (err) => {
         if (err) console.log('Psmrc.js: spritesheet Error: ', err);
