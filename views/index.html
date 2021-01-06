@@ -15,17 +15,24 @@
 
   <div class="container">
     <div class="row">
-      <div class="col-xs-12">
+      <div class="col-xs-12 col-md-12">
         <div class="panel panel-default">
           <div class="panel-body">
             <h2>PSVita Minecraft</h2>
             <h4>Resource Pack Converter</h4>
             <img class="logo" src="img/psvita.gif" alt="">
-            <h4>v2.0</h4>
-            <p>Upload a modern resource pack to receive a PSVita Minecraft v1.83 compatible texture pack.</p>
-            <p>Requires A modded PSVita with the rePatch plugin.</p>
+            <h4>v2.1</h4>
+            <p>Upload a modern resource pack to receive a PSVita Minecraft v1.84+ compatible texture pack.</p>
+            <p>Requires a modded PSVita with the rePatch plugin.</p>
             <p>Extract zip in ux0:/rePatch</p>
-            <i>Note: You may need the 0syscall6 plugin to allow v1.83 Minecraft to run on your firmware.</i>
+            <br/>
+            <div>
+              <div>Optional: Not all texture conversions are implemented. To support fallback (legal reasons), upload the decrypted texture pack files <b>terrain.png</b> and <b>items.png</b> from the official game at the same time. (Hold Control to select multiple files)</div>
+              <small>(Possible IDs: PCSE00491, PCSB00560, PCSB00560, VCJS-10010)</small>
+              <br />
+              <small>(Folder Path: Common/res/TitleUpdate/res)</small>
+            </div>
+            <br />
             <div class="progress">
               <div class="progress-bar" role="progressbar"></div>
             </div>
@@ -33,7 +40,7 @@
               <input type="checkbox" id="smoothing" name="smoothing" value="smoothing">
               <label for="smoothing"> Enable Smoothing (great for HD textures)</label>
             </div>
-            <button class="btn btn-lg upload-btn" type="button">Upload File</button>
+            <button class="btn btn-lg upload-btn" type="button">Upload Resource Pack</button>
             <div class=" social col-xs-12 col-sm-12 col-md-12 col-lg-12">
               <a target="_blank" href="https://github.com/darkenvy/PSMRC-Node"><i class="fa fa-github fa-2x" aria-hidden="true"></i></a>
               <!-- <a target="_blank" href="https://www.reddit.com/r/vitahacks/comments/5j3ssk/release_ps_minecraft_resource_converter_psmrc_v10/"><i class="fa fa-reddit-alien fa-2x" aria-hidden="true"></i></a> -->

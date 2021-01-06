@@ -19,7 +19,7 @@ var layout = [
   // '/mob',
   // '/art',
   // '/textures'
-]
+];
 
 // ----------------- Directory Functions ----------------- //
 
@@ -32,16 +32,16 @@ function makeLayout(folder, cookie) {
   }
 }
 
-function findPNG(shortDirectory, filename, index /* optional */) {
+function findPNG(shortDirectory, filename, index /* optional */, toggles /* optional */) {
   return new Promise( (resolve, reject) => {
     const debug = false;
+    const { canHasItems, canHasTerrain } = toggles;
     const userDir = importDirectory + '-unzip/assets/minecraft/textures/' + shortDirectory + filename;
-    const fallbackDir = path.join(
-      __dirname,
-      debug ? '/uploads/fallback_debug/' : '/uploads/fallback/',
-      shortDirectory,
-      `${index}.png`,
-    );
+    let fallbackShortDir = '/uploads/fallback_blank';
+    if (canHasItems && canHasTerrain) fallbackShortDir = '/uploads/fallback/';
+    if (debug) fallbackShortDir = '/uploads/fallback_debug/';
+
+    const fallbackDir = path.join(__dirname, fallbackShortDir, shortDirectory, `${index}.png`);
     
     if (fs.existsSync(userDir)) {
       resolve(userDir);
@@ -56,12 +56,12 @@ function findPNG(shortDirectory, filename, index /* optional */) {
 
 // ----------------- Imagemagick Functions ----------------- //
 
-function montageEach(spritesheet, sprites, sheetSize, folder, savename, smoothing) {
+function montageEach(spritesheet, sprites, sheetSize, folder, savename, { smoothing, toggles }) {
   return new Promise( (resolve, reject) => {
     // Recursive function to allow successive Promises to resolve in sequence
     let counter = 0;
     let apply = function(spritesheet, sprites) {
-      findPNG(folder, sprites[counter], counter).then(dir => {
+      findPNG(folder, sprites[counter], counter, toggles).then(dir => {
         spritesheet.montage(dir);
         if (counter < sprites.length-1) {
           counter += 1;
@@ -192,9 +192,9 @@ function process(res, cookie, options) {
     var blockSpritesheet = gm(256,544).bitdepth(8).background('transparent');
     var itemSpritesheet = gm(256,272).bitdepth(8).background('transparent');
 
-    montageEach(blockSpritesheet, blockSprites, '16x34', 'block/', 'terrain.png', smoothing)
+    montageEach(blockSpritesheet, blockSprites, '16x34', 'block/', 'terrain.png', options)
     .then( () => { 
-      montageEach(itemSpritesheet, itemSprites, '16x17', 'item/', 'items.png', smoothing)
+      montageEach(itemSpritesheet, itemSprites, '16x17', 'item/', 'items.png', options)
       .then( () => { 
         // Copy Destroy Stages 0-9
         moveAndConvert()
