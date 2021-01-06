@@ -52,6 +52,10 @@ $("#upload-input").on("change", function () {
     success: function (data) {
       console.log("upload successful!");
       checkDoneInterval = setInterval(checkDone, 2500);
+      setTimeout(() => {
+        $(".progress-bar").html("Timed Out. Please Try again in a few minutes");
+        clearInterval(checkDoneInterval);
+      }, 150 * 1000);
     }
   });
 });
